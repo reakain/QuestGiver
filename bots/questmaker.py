@@ -5,6 +5,7 @@ from random import randint
 import nltk
 nltk.download('brown')
 nltk.download('names')
+nltk.download('wordnet')
 
 logger = logging.getLogger()
 inflector = inflect.engine()
