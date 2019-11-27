@@ -18,6 +18,7 @@ class Request(object):
         self.pnouns = [word for (word, tag) in self.tagged_words if tag == 'NP']
         self.names = nltk.corpus.names.words('male.txt') + nltk.corpus.names.words('female.txt')
         self.names = list(set(self.names))
+        self.greetings = []
 
     def get_similar(self,word):
         """ Returns a word or phrase similar to the word provided.
@@ -29,6 +30,9 @@ class Request(object):
             similar_word (str): The string similar to "word".
         
         """
+        syns = nltk.corpus.wordnet.synsets("hello")
+        similar_word = syns[randint(0,len(syns)-1)].lemmas()
+
         similar_word = ""
         return similar_word
 
@@ -125,10 +129,9 @@ class Request(object):
     def generate_new_quest(self):
         """ Returns generated quest dialog.
 
-        Format logic of returned string is:
-            [Greeting] [traveller],
-            [Please] [verb] for me [number] [adjective] [noun] [preposition] [proper noun]
-
+        Format logic of returned string is always some form of greeting with then one of 
+        multiple sentence structure options for the request itself.
+            
         Example output:
             Greetings traveller,
             Could you please find for me three golden rocks of Lambert?
@@ -143,6 +146,14 @@ class Request(object):
         return quest
 
     def get_request(self,style):
+        """ Switcher function for getting one of the different request styles
+
+        Parameters:
+            style (int): Which style of request to build
+
+        Returns:
+            method (): The specified method function is then called to run
+        """
         method_name = 'request_'+str(style)
         method = getattr(self,method_name,lambda :'Invalid')
         return method()

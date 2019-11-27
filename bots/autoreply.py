@@ -4,11 +4,13 @@
 import tweepy
 import logging
 from config import create_api
-from questmaker import generate_new_quest
+from questmaker import Request
 import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
+
+quests = Request()
 
 def check_mentions(api, keywords, since_id):
     logger.info("Retrieving mentions")
@@ -25,7 +27,7 @@ def check_mentions(api, keywords, since_id):
 
             api.update_status(
             #    status="Please reach us via DM",
-                status=generate_new_quest(),
+                status=quests.generate_new_quest(),
                 in_reply_to_status_id=tweet.id,
             )
     return new_since_id
@@ -33,8 +35,9 @@ def check_mentions(api, keywords, since_id):
 def main():
     api = create_api()
     since_id = 1
+    
     while True:
-        since_id = check_mentions(api, ["help", "support"], since_id)
+        since_id = check_mentions(api, ["quest", "task"], since_id)
         logger.info("Waiting...")
         time.sleep(60)
 
