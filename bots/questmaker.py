@@ -18,9 +18,8 @@ class Request(object):
         self.pnouns = [word for (word, tag) in self.tagged_words if tag == 'NP']
         self.names = nltk.corpus.names.words('male.txt') + nltk.corpus.names.words('female.txt')
         self.names = list(set(self.names))
-        self.greetings = []
 
-    def get_similar(self,word):
+    def get_similar(self,word,pos):
         """ Returns a word or phrase similar to the word provided.
 
         Parameters:
@@ -30,41 +29,13 @@ class Request(object):
             similar_word (str): The string similar to "word".
         
         """
-        syns = nltk.corpus.wordnet.synsets("hello")
-        similar_word = syns[randint(0,len(syns)-1)].lemmas()
+        syns = nltk.corpus.wordnet.synsets(word,pos)
+        lemmas = syns[randint(0,len(syns)-1)].lemmas()
+        similar_word = lemmas[randint(0,len(lemmas)-1)].name()
+        similar_word = similar_word.replace("-"," ")
+        similar_word = similar_word.replace("_"," ")
 
-        similar_word = ""
         return similar_word
-
-    def get_greeting(self):
-        """ Returns the greeting dialogue component.
-
-        Returns:
-            greeting (str): The string denoting the greeting section of quest dialogue.
-        
-        """
-        greeting = ""
-        return greeting
-
-    def get_traveller(self):
-        """ Returns the traveller dialogue component between greeting and please.
-
-        Returns:
-            traveller (str): The string denoting the traveller section of quest dialogue.
-        
-        """
-        traveller = ""
-        return traveller
-
-    def get_please(self):
-        """ Returns the "please" dialogue component between traveller and task.
-
-        Returns:
-            please (str): The string denoting the please section of quest dialogue.
-        
-        """
-        please = ""
-        return please
 
     def get_verb(self):
         """ Returns the "verb" dialogue component between please and num.
@@ -140,8 +111,9 @@ class Request(object):
             quest (str): The string of complete quest dialogue to publish.
         
         """
-        quest = self.get_greeting() + ", "  \
-            + self.get_traveller() + ".\n" \
+        quest = self.get_similar("greetings",'n').capitalize() + ", "  \
+            + self.get_similar("buddy",'n') + ".\n" \
+            +self.get_similar("please",'r').capitalize() + " " \
             + self.get_request(randint(1,3))
         return quest
 
@@ -160,7 +132,7 @@ class Request(object):
 
     def request_1(self):
         """ Request style with form:
-        [Please] [verb] for me [number] [adjective] [noun] [preposition] [proper noun]
+        [verb] for me [number] [adjective] [noun] [preposition] [proper noun]
 
         Returns:
             request (str): The string denoting the request portion of the dialogue.
@@ -171,8 +143,7 @@ class Request(object):
 
         plural_noun = inflector.plural(self.get_noun(),val_amount)
 
-        request = self.get_please() + " " \
-            + self.get_verb() + " for me " \
+        request = self.get_verb() + " for me " \
             + num + " " \
             + self.get_adjective() + " " \
             + plural_noun + " " \
@@ -182,7 +153,7 @@ class Request(object):
 
     def request_2(self):
         """ Request style with form:
-        [Please] get [noun], [noun], [noun], ..., and [noun] for me
+        get [noun], [noun], [noun], ..., and [noun] for me
 
         Returns:
             request (str): The string denoting the request portion of the dialogue.
@@ -196,13 +167,13 @@ class Request(object):
        
         nounlist = inflector.join(nouns)
 
-        request = self.get_please() + " get " \
+        request = self.get_similar("get",'v') + " " \
             + nounlist + " for me."
         return request
 
     def request_3(self):
         """ Request style with form:
-        [Please] kill [proper noun], [proper noun], ..., and [proper noun] for [pronoun]
+        kill [proper noun], [proper noun], ..., and [proper noun] for [pronoun]
 
         Returns:
             request (str): The string denoting the request portion of the dialogue.
@@ -216,7 +187,7 @@ class Request(object):
        
         namelist = inflector.join(nams)
 
-        request = self.get_please() + " kill " \
+        request = self.get_similar("kill",'v') + " " \
             + namelist + " for me."
         return request
 
