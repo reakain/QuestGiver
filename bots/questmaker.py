@@ -4,58 +4,144 @@ import inflect
 from random import randint
 import nltk
 nltk.download('brown')
-nltk.download('universal_tagset')
+nltk.download('names')
 
 logger = logging.getLogger()
 inflector = inflect.engine()
 
-minFreq = 1000
-
-def generate_new_quest():
-    """ Returns generated quest dialog.
-
-    Format logic of returned string is:
-        [Greeting] [traveller],
-        [Please] [verb] for me [number] [adjective] [noun] [preposition] [proper noun]
-
-    Example output:
-        Greetings traveller,
-        Could you please find for me three golden rocks of Lambert?
-
-    Parameters:
-        None
-
-    Returns:
-        quest (str): The string of complete quest dialogue to publish.
-    
-    """
-    
-
-    val_amount = randint(1,100)
-    num = inflector.number_to_words(val_amount)
-
-    plural_noun = inflector.plural(get_noun(),val_amount)
-
-    quest = get_greeting() + ", "  \
-        + get_traveller() + ".\n" \
-        + get_please() + " " \
-        + get_verb() + " for me " \
-        + num + " " \
-        + get_adjective() + " " \
-        + plural_noun + " " \
-        + get_preposition() + " " \
-        + get_proper_noun() + "?"
-    return quest
-
-# def get_word(word_type):
-#     val = rw.get_random_word(hasDictionaryDef="true",includePartOfSpeech=word_type, minCorpusCount=minFreq)
-#     return val
-
-# def get_words(word_type,num):
-#     vals = rw.get_random_words(hasDictionaryDef="true",includePartOfSpeech=word_type, minCorpusCount=minFreq, limit=num)
-#     return vals
-
 class Request(object):
+    def __init__(self):
+        self.tagged_words = nltk.corpus.brown.tagged_words()
+        self.verbs = [word for (word, tag) in self.tagged_words if tag == 'VB']
+        self.nouns = [word for (word, tag) in self.tagged_words if tag == 'NN']
+        self.adjs = [word for (word, tag) in self.tagged_words if tag == 'JJ']
+        self.pnouns = [word for (word, tag) in self.tagged_words if tag == 'NP']
+        self.names = nltk.corpus.names.words('male.txt') + nltk.corpus.names.words('female.txt')
+        self.names = list(set(self.names))
+
+    def get_similar(self,word):
+        """ Returns a word or phrase similar to the word provided.
+
+        Parameters:
+            word (str): The word you want to get a similar string to
+
+        Returns:
+            similar_word (str): The string similar to "word".
+        
+        """
+        similar_word = ""
+        return similar_word
+
+    def get_greeting(self):
+        """ Returns the greeting dialogue component.
+
+        Returns:
+            greeting (str): The string denoting the greeting section of quest dialogue.
+        
+        """
+        greeting = ""
+        return greeting
+
+    def get_traveller(self):
+        """ Returns the traveller dialogue component between greeting and please.
+
+        Returns:
+            traveller (str): The string denoting the traveller section of quest dialogue.
+        
+        """
+        traveller = ""
+        return traveller
+
+    def get_please(self):
+        """ Returns the "please" dialogue component between traveller and task.
+
+        Returns:
+            please (str): The string denoting the please section of quest dialogue.
+        
+        """
+        please = ""
+        return please
+
+    def get_verb(self):
+        """ Returns the "verb" dialogue component between please and num.
+
+        Returns:
+            verb (str): The string denoting the verb section of quest dialogue.
+        
+        """
+        val = randint(0,len(self.verbs)-1)
+        return self.verbs[val]
+
+    def get_adjective(self):
+        """ Returns the adjective dialogue component between number and noun.
+
+        Returns:
+            adj (str): The string denoting the adjective section of quest dialogue.
+        
+        """
+        val = randint(0,len(self.adjs)-1)
+        return self.adjs[val]
+
+    def get_noun(self):
+        """ Returns the noun dialogue component between adjective and preposition.
+
+        Returns:
+            noun (str): The string denoting the noun section of quest dialogue.
+        
+        """
+        val = randint(0,len(self.nouns)-1)
+        return self.nouns[val]
+
+    def get_preposition(self):
+        """ Returns the preposition dialogue component between noun and proper noun.
+
+        Returns:
+            prep (str): The string denoting the preposition section of quest dialogue.
+        
+        """
+        prep = ""
+        return prep
+
+    def get_proper_noun(self):
+        """ Returns the proper noun dialogue component at the end of the quest
+
+        Returns:
+            pnoun (str): The string denoting the proper noun section of quest dialogue.
+        
+        """
+        val = randint(0,len(self.pnouns)-1)
+        return self.pnouns[val]
+
+    def get_name(self):
+        """ Returns the proper noun dialogue component at the end of the quest
+
+        Returns:
+            name (str): The string denoting the proper noun section of quest dialogue.
+        
+        """
+        val = randint(0,len(self.names)-1)
+        return self.names[val]
+
+    def generate_new_quest(self):
+        """ Returns generated quest dialog.
+
+        Format logic of returned string is:
+            [Greeting] [traveller],
+            [Please] [verb] for me [number] [adjective] [noun] [preposition] [proper noun]
+
+        Example output:
+            Greetings traveller,
+            Could you please find for me three golden rocks of Lambert?
+
+        Returns:
+            quest (str): The string of complete quest dialogue to publish.
+        
+        """
+        quest = self.get_greeting() + ", "  \
+            + self.get_traveller() + ".\n" \
+            + self.get_request(randint(1,3))
+        return quest
+
     def get_request(self,style):
         method_name = 'request_'+str(style)
         method = getattr(self,method_name,lambda :'Invalid')
@@ -65,52 +151,41 @@ class Request(object):
         """ Request style with form:
         [Please] [verb] for me [number] [adjective] [noun] [preposition] [proper noun]
 
-        Parameters:
-            None
-
         Returns:
-            greeting (str): The string denoting the greeting section of quest dialogue.
+            request (str): The string denoting the request portion of the dialogue.
     
         """
         val_amount = randint(1,100)
         num = inflector.number_to_words(val_amount)
 
-        verb = ""#get_word("verb")
+        plural_noun = inflector.plural(self.get_noun(),val_amount)
 
-        adj = ""#get_word("adjective")
-
-        noun = ""#get_word("noun")
-        plural_noun = inflector.plural(noun,val_amount)
-
-        request = get_please() + " " \
-            + verb + " for me " \
+        request = self.get_please() + " " \
+            + self.get_verb() + " for me " \
             + num + " " \
-            + adj + " " \
+            + self.get_adjective() + " " \
             + plural_noun + " " \
-            + get_preposition() + " " \
-            + get_proper_noun() + "?"
+            + self.get_preposition() + " " \
+            + self.get_proper_noun() + "?"
         return request
 
     def request_2(self):
         """ Request style with form:
         [Please] get [noun], [noun], [noun], ..., and [noun] for me
 
-        Parameters:
-            None
-
         Returns:
-            greeting (str): The string denoting the greeting section of quest dialogue.
+            request (str): The string denoting the request portion of the dialogue.
     
         """
         val_amount = randint(3,8)
 
         nouns = []
         for x in range(val_amount):
-            nouns.append(get_noun())
+            nouns.append(self.get_noun())
        
-        nounlist = join(nouns)
+        nounlist = inflector.join(nouns)
 
-        request = get_please() + " get " \
+        request = self.get_please() + " get " \
             + nounlist + " for me."
         return request
 
@@ -118,145 +193,25 @@ class Request(object):
         """ Request style with form:
         [Please] kill [proper noun], [proper noun], ..., and [proper noun] for [pronoun]
 
-        Parameters:
-            None
-
         Returns:
-            greeting (str): The string denoting the greeting section of quest dialogue.
+            request (str): The string denoting the request portion of the dialogue.
     
         """
         val_amount = randint(3,8)
 
-        names = nltk.corpus.names
+        nams = []
+        for x in range(val_amount):
+            nams.append(self.get_name())
+       
+        namelist = inflector.join(nams)
+
+        request = self.get_please() + " kill " \
+            + namelist + " for me."
+        return request
 
 
-
-def get_greeting():
-    """ Returns the greeting dialogue component.
-
-    Parameters:
-        None
-
-    Returns:
-        greeting (str): The string denoting the greeting section of quest dialogue.
-    
-    """
-    greeting = ""
-    return greeting
-
-def get_traveller():
-    """ Returns the traveller dialogue component between greeting and please.
-
-    Parameters:
-        None
-
-    Returns:
-        traveller (str): The string denoting the traveller section of quest dialogue.
-    
-    """
-    traveller = ""
-    return traveller
-
-def get_please():
-    """ Returns the "please" dialogue component between traveller and task.
-
-    Parameters:
-        None
-
-    Returns:
-        please (str): The string denoting the please section of quest dialogue.
-    
-    """
-    please = ""
-    return please
-
-def get_verb():
-    """ Returns the "verb" dialogue component between please and num.
-
-    Parameters:
-        None
-
-    Returns:
-        verb (str): The string denoting the verb section of quest dialogue.
-    
-    """
-    tagged_words = nltk.corpus.brown.tagged_words(tagset="universal")
-    verbs = [word for (word, tag) in tagged_words if tag == 'VERB']
-    val = randint(0,len(verbs)-1)
-    return verbs[val]
-
-def get_num():
-    """ Returns the number dialogue component between verb and adjective.
-
-    Parameters:
-        None
-
-    Returns:
-        num (str): The string denoting the number section of quest dialogue.
-    
-    """
-    val = randint(1,100)
-    num = inflector.number_to_words(val)
-    return num
-
-def get_adjective():
-    """ Returns the adjective dialogue component between number and noun.
-
-    Parameters:
-        None
-
-    Returns:
-        adj (str): The string denoting the adjective section of quest dialogue.
-    
-    """
-    tagged_words = nltk.corpus.brown.tagged_words(tagset="universal")
-    adjs = [word for (word, tag) in tagged_words if tag == 'ADJ']
-    val = randint(0,len(adjs)-1)
-    return adjs[val]
-
-def get_noun():
-    """ Returns the noun dialogue component between adjective and preposition.
-
-    Parameters:
-        None
-
-    Returns:
-        noun (str): The string denoting the noun section of quest dialogue.
-    
-    """
-    tagged_words = nltk.corpus.brown.tagged_words(tagset="universal")
-    nouns = [word for (word, tag) in tagged_words if tag == 'NOUN']
-    val = randint(0,len(nouns)-1)
-    return nouns[val]
-
-def get_preposition():
-    """ Returns the preposition dialogue component between noun and proper noun.
-
-    Parameters:
-        None
-
-    Returns:
-        prep (str): The string denoting the preposition section of quest dialogue.
-    
-    """
-    prep = ""
-    return prep
-
-def get_proper_noun():
-    """ Returns the proper noun dialogue component at the end of the quest
-
-    Parameters:
-        None
-
-    Returns:
-        pnoun (str): The string denoting the proper noun section of quest dialogue.
-    
-    """
-    tagged_words = nltk.corpus.brown.tagged_words(tagset="universal")
-    nouns = [word for (word, tag) in tagged_words if tag == 'NOUN']
-    val = randint(0,len(nouns)-1)
-    return nouns[val]
 
 if __name__ == "__main__":
-
-    print(generate_new_quest())
+    quests = Request()
+    for x in range(0,10):
+        print(quests.generate_new_quest())
