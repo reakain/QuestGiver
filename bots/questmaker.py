@@ -17,6 +17,7 @@ class Request(object):
         self.nouns = [word for (word, tag) in self.tagged_words if tag == 'NN']
         self.adjs = [word for (word, tag) in self.tagged_words if tag == 'JJ']
         self.pnouns = [word for (word, tag) in self.tagged_words if tag == 'NP']
+        self.preps = [word for (word,tag) in self.tagged_words if tag == 'IN']
         self.names = nltk.corpus.names.words('male.txt') + nltk.corpus.names.words('female.txt')
         self.names = list(set(self.names))
 
@@ -75,8 +76,8 @@ class Request(object):
             prep (str): The string denoting the preposition section of quest dialogue.
         
         """
-        prep = ""
-        return prep
+        val = randint(0,len(self.preps)-1)
+        return self.preps[val]
 
     def get_proper_noun(self):
         """ Returns the proper noun dialogue component at the end of the quest
@@ -160,7 +161,7 @@ class Request(object):
             request (str): The string denoting the request portion of the dialogue.
     
         """
-        val_amount = randint(3,8)
+        val_amount = randint(2,8)
 
         nouns = []
         for x in range(val_amount):
@@ -180,7 +181,7 @@ class Request(object):
             request (str): The string denoting the request portion of the dialogue.
     
         """
-        val_amount = randint(3,8)
+        val_amount = randint(2,8)
 
         nams = []
         for x in range(val_amount):
